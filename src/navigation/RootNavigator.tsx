@@ -1,0 +1,114 @@
+// src/navigation/RootNavigator.tsx
+
+import React from 'react';
+import { Platform } from 'react-native';
+import {
+    NavigationContainer,
+    DefaultTheme,
+    Theme,
+} from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+
+import HomeScreen from '../screens/home/HomeScreen';
+import SocialScreen from '../screens/social/SocialScreen';
+import MessagesScreen from '../screens/messages/MessagesScreen';
+import ProfileStackNavigator from './ProfileStackNavigator';
+import colors from '../theme/colors';
+
+export type RootTabParamList = {
+    HomeTab: undefined;
+    SocialTab: undefined;
+    MessagesTab: undefined;
+    ProfileTab: undefined;
+};
+
+const Tab = createBottomTabNavigator<RootTabParamList>();
+
+const navTheme: Theme = {
+    ...DefaultTheme,
+    colors: {
+        ...DefaultTheme.colors,
+        background: colors.background,
+        card: colors.backgroundAlt,
+        border: colors.borderSubtle,
+        text: colors.textPrimary,
+        primary: colors.accent,
+    },
+};
+
+const RootNavigator: React.FC = () => {
+    return (
+        <NavigationContainer theme={navTheme}>
+            <Tab.Navigator
+                initialRouteName="ProfileTab"
+                screenOptions={({ route }) => ({
+                    headerShown: false,
+                    tabBarShowLabel: true,
+                    tabBarActiveTintColor: colors.accent,
+                    tabBarInactiveTintColor: colors.textMuted,
+                    tabBarStyle: {
+                        backgroundColor: '#11111a',
+                        borderTopWidth: 1,
+                        borderTopColor: colors.borderSubtle,
+                        height: Platform.OS === 'android' ? 64 : 80,
+                        paddingBottom: Platform.OS === 'android' ? 8 : 16,
+                        paddingTop: 8,
+                    },
+                    tabBarLabelStyle: {
+                        fontSize: 11,
+                    },
+                    tabBarIcon: ({ color, size, focused }) => {
+                        let iconName: React.ComponentProps<
+                            typeof Ionicons
+                        >['name'] = 'home';
+
+                        if (route.name === 'HomeTab') {
+                            iconName = focused ? 'home' : 'home-outline';
+                        } else if (route.name === 'SocialTab') {
+                            iconName = focused ? 'people' : 'people-outline';
+                        } else if (route.name === 'MessagesTab') {
+                            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+                        } else if (route.name === 'ProfileTab') {
+                            iconName = focused
+                                ? 'person-circle'
+                                : 'person-circle-outline';
+                        }
+
+                        return <Ionicons name={iconName} size={size} color={color} />;
+                    },
+                })}
+            >
+                <Tab.Screen
+                    name="HomeTab"
+                    component={HomeScreen}
+                    options={{ title: 'Home' }}
+                />
+                <Tab.Screen
+                    name="SocialTab"
+                    component={SocialScreen}
+                    options={{ title: 'Social' }}
+                />
+                <Tab.Screen
+                    name="MessagesTab"
+                    component={MessagesScreen}
+                    options={{
+                        title: 'Message',
+                        tabBarBadge: 1,
+                        tabBarBadgeStyle: {
+                            backgroundColor: colors.danger,
+                            color: 'white',
+                        },
+                    }}
+                />
+                <Tab.Screen
+                    name="ProfileTab"
+                    component={ProfileStackNavigator}
+                    options={{ title: 'Me' }}
+                />
+            </Tab.Navigator>
+        </NavigationContainer>
+    );
+};
+
+export default RootNavigator;
