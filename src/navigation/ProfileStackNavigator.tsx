@@ -14,6 +14,12 @@ import {
     NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 
+import { useAuth } from '../contexts/AuthContext';
+import {
+    formatUserIdFromUid,
+    fallbackUsernameFromEmail,
+} from '../utils/user';
+
 /**
  * ROUTE TYPES
  * ------------------------------------------------------------------ */
@@ -199,12 +205,22 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({ label, onPress }) => {
 
 /**
  * PROFILE HOME SCREEN
- * (the main "Me" page from your screenshot)
+ * (main "Me" page)
  * ------------------------------------------------------------------ */
 
 type ProfileHomeProps = ProfileStackScreenProps<'ProfileHome'>;
 
 const ProfileHomeScreen: React.FC<ProfileHomeProps> = ({ navigation }) => {
+    const { user } = useAuth();
+
+    const displayName =
+        user?.displayName?.trim() ||
+        fallbackUsernameFromEmail(user?.email) ||
+        'New user';
+
+    const userId =
+        user?.uid != null ? formatUserIdFromUid(user.uid) : '000-000-000';
+
     return (
         <ScrollView
             style={styles.root}
@@ -214,18 +230,20 @@ const ProfileHomeScreen: React.FC<ProfileHomeProps> = ({ navigation }) => {
             {/* Profile header */}
             <View style={styles.profileHeaderRow}>
                 <View style={styles.avatarBubble}>
-                    <Text style={styles.avatarEmoji}>👨‍💻</Text>
+                    <Text style={styles.avatarEmoji}>🔔</Text>
                 </View>
 
                 <View style={styles.profileHeaderTextColumn}>
-                    <Text style={styles.profileName}>PierzAustn</Text>
-                    <Text style={styles.profileId}>ID 824-320-297</Text>
+                    <Text style={styles.profileName}>{displayName}</Text>
+                    <Text style={styles.profileId}>ID {userId}</Text>
 
                     <Pressable
                         style={styles.completeProfileChip}
                         onPress={() => navigation.navigate('EditProfile')}
                     >
-                        <Text style={styles.completeProfileChipText}>Complete profile</Text>
+                        <Text style={styles.completeProfileChipText}>
+                            Complete profile
+                        </Text>
                     </Pressable>
                 </View>
             </View>
@@ -251,7 +269,9 @@ const ProfileHomeScreen: React.FC<ProfileHomeProps> = ({ navigation }) => {
                 onPress={() => navigation.navigate('Tasks')}
             >
                 <View style={styles.tasksHeaderRow}>
-                    <Text style={styles.tasksTitle}>Complete tasks and win rewards</Text>
+                    <Text style={styles.tasksTitle}>
+                        Complete tasks and win rewards
+                    </Text>
                     <Text style={styles.tasksMore}>More tasks &gt;</Text>
                 </View>
 
@@ -299,7 +319,9 @@ const ProfileHomeScreen: React.FC<ProfileHomeProps> = ({ navigation }) => {
                                     { backgroundColor: feature.background },
                                 ]}
                             >
-                                <Text style={styles.featureIconEmoji}>{feature.iconEmoji}</Text>
+                                <Text style={styles.featureIconEmoji}>
+                                    {feature.iconEmoji}
+                                </Text>
                             </View>
                             <Text style={styles.featureLabel}>{feature.label}</Text>
                         </Pressable>
@@ -334,7 +356,6 @@ const ProfileHomeScreen: React.FC<ProfileHomeProps> = ({ navigation }) => {
 
 /**
  * SIMPLE DETAIL SCREENS
- * (no params; just static placeholder copy)
  * ------------------------------------------------------------------ */
 
 const EditProfileScreen: React.FC<
@@ -345,8 +366,8 @@ const EditProfileScreen: React.FC<
         description="Let users set their avatar, nickname, and personal details here."
     >
         <Text style={styles.placeholderBody}>
-            This is a placeholder edit-profile screen. Plug your real profile-editing
-            UI here.
+            This is a placeholder edit-profile screen. Plug your real
+            profile-editing UI here.
         </Text>
     </ScreenContainer>
 );
@@ -359,8 +380,8 @@ const TasksScreen: React.FC<ProfileStackScreenProps<'Tasks'>> = ({
         description="Daily, weekly, and special tasks that grant XP, coins, and beans."
     >
         <Text style={styles.placeholderBody}>
-            Replace this with a full tasks list UI (daily check-in streaks, event
-            missions, etc.).
+            Replace this with a full tasks list UI (daily check-in streaks,
+            event missions, etc.).
         </Text>
         <PrimaryButton
             label="Go to daily check-in"
@@ -388,31 +409,34 @@ const WalletScreen: React.FC<ProfileStackScreenProps<'Wallet'>> = () => (
         description="Balances for diamonds, golden beans, and other in‑app currencies."
     >
         <Text style={styles.placeholderBody}>
-            Build a wallet summary, transaction history, and recharge / withdrawal
-            actions here.
+            Build a wallet summary, transaction history, and recharge /
+            withdrawal actions here.
         </Text>
     </ScreenContainer>
 );
 
 /**
  * GENERIC FEATURE PLACEHOLDER SCREEN
- * (Backpack, Nobility, Mall, etc.)
  * ------------------------------------------------------------------ */
 
 type FeatureScreenProps = NativeStackScreenProps<ProfileStackParamList>;
 
-const FeaturePlaceholderScreen: React.FC<FeatureScreenProps> = ({ route }) => {
-    // This screen is only used for the feature routes defined in FEATURE_DEFINITIONS.
+const FeaturePlaceholderScreen: React.FC<FeatureScreenProps> = ({
+                                                                    route,
+                                                                }) => {
     const featureKey = route.name as FeatureRouteName;
     const feature = FEATURE_MAP[featureKey];
 
     return (
-        <ScreenContainer title={feature.label} description={feature.description}>
+        <ScreenContainer
+            title={feature.label}
+            description={feature.description}
+        >
             <Text style={styles.placeholderBody}>
                 This is the placeholder screen for the{' '}
                 <Text style={styles.placeholderBodyStrong}>{feature.label}</Text>{' '}
-                feature. Flesh this out with the real functionality and UI when you’re
-                ready.
+                feature. Flesh this out with the real functionality and UI when
+                you’re ready.
             </Text>
         </ScreenContainer>
     );
