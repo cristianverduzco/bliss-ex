@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    StyleSheet,
-    TouchableOpacity,
+    ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
-    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -66,17 +66,32 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
                 password,
             );
 
-            // Set displayName for profile.
             await updateProfile(credential.user, {
                 displayName: trimmedUsername,
             });
 
-            // Store extra data in Firestore (for lookups like "forgot username").
             await setDoc(doc(db, 'users', credential.user.uid), {
                 uid: credential.user.uid,
                 email: trimmedEmail,
                 username: trimmedUsername,
+                displayName: trimmedUsername,
                 createdAt: serverTimestamp(),
+
+                // profile fields (empty by default)
+                bio: '',
+                gender: null,
+                age: null,
+                starSign: null,
+                location: '',
+                hobbies: [],
+
+                // social graph
+                followersCount: 0,
+                followingCount: 0,
+
+                // presence
+                isOnline: true,
+                lastSeenAt: serverTimestamp(),
             });
 
             await sendEmailVerification(credential.user);
@@ -97,8 +112,8 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.container}>
                 <Text style={styles.title}>Create your account</Text>
                 <Text style={styles.subtitle}>
-                    Sign up with your email. We&apos;ll send a confirmation link to
-                    activate your profile.
+                    Sign up with your email. We&apos;ll send a confirmation
+                    link to activate your profile.
                 </Text>
 
                 <Text style={styles.inputLabel}>Username</Text>
@@ -157,12 +172,16 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
                     {submitting ? (
                         <ActivityIndicator color="#000" />
                     ) : (
-                        <Text style={styles.primaryButtonText}>Create account</Text>
+                        <Text style={styles.primaryButtonText}>
+                            Create account
+                        </Text>
                     )}
                 </TouchableOpacity>
 
                 <View style={styles.bottomRow}>
-                    <Text style={styles.bottomText}>Already have an account?</Text>
+                    <Text style={styles.bottomText}>
+                        Already have an account?
+                    </Text>
                     <TouchableOpacity
                         onPress={() => navigation.navigate('Login')}
                         activeOpacity={0.8}

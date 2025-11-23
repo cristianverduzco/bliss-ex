@@ -2,26 +2,27 @@
 
 import React from 'react';
 import {
-    Platform,
-    View,
     ActivityIndicator,
+    Platform,
     StyleSheet,
+    View,
 } from 'react-native';
 import {
-    NavigationContainer,
     DefaultTheme,
-    Theme,
+    NavigationContainer,
+    type Theme,
 } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/home/HomeScreen';
-import SocialScreen from '../screens/social/SocialScreen';
 import MessagesScreen from '../screens/messages/MessagesScreen';
 import ProfileStackNavigator from './ProfileStackNavigator';
 import AuthStackNavigator from './AuthStackNavigator';
 import colors from '../theme/colors';
 import { useAuth } from '../contexts/AuthContext';
+import SocialStackNavigator from './SocialStackNavigator';
+import { usePresence } from '../hooks/usePresence';
 
 export type RootTabParamList = {
     HomeTab: undefined;
@@ -65,19 +66,27 @@ const MainTabs: React.FC = () => {
                     fontSize: 11,
                 },
                 tabBarIcon: ({ color, size, focused }) => {
-                    let iconName: React.ComponentProps<typeof Ionicons>['name'] = 'home';
+                    let iconName: React.ComponentProps<
+                        typeof Ionicons
+                    >['name'] = 'home';
 
                     if (route.name === 'HomeTab') {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'SocialTab') {
                         iconName = focused ? 'people' : 'people-outline';
                     } else if (route.name === 'MessagesTab') {
-                        iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+                        iconName = focused
+                            ? 'chatbubbles'
+                            : 'chatbubbles-outline';
                     } else if (route.name === 'ProfileTab') {
-                        iconName = focused ? 'person-circle' : 'person-circle-outline';
+                        iconName = focused
+                            ? 'person-circle'
+                            : 'person-circle-outline';
                     }
 
-                    return <Ionicons name={iconName} size={size} color={color} />;
+                    return (
+                        <Ionicons name={iconName} size={size} color={color} />
+                    );
                 },
             })}
         >
@@ -88,7 +97,7 @@ const MainTabs: React.FC = () => {
             />
             <Tab.Screen
                 name="SocialTab"
-                component={SocialScreen}
+                component={SocialStackNavigator}
                 options={{ title: 'Social' }}
             />
             <Tab.Screen
@@ -114,6 +123,9 @@ const MainTabs: React.FC = () => {
 
 const RootNavigator: React.FC = () => {
     const { user, initializing } = useAuth();
+
+    // keep user presence updated while authenticated
+    usePresence();
 
     return (
         <NavigationContainer theme={navTheme}>

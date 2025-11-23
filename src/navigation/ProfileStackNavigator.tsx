@@ -2,23 +2,22 @@
 
 import React from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    Pressable,
     GestureResponderEvent,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
 } from 'react-native';
 import {
     createNativeStackNavigator,
-    NativeStackScreenProps,
+    type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 
-import { useAuth } from '../contexts/AuthContext';
-import {
-    formatUserIdFromUid,
-    fallbackUsernameFromEmail,
-} from '../utils/user';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import FollowListScreen from '../screens/profile/FollowListScreen';
+import UserProfileScreen from '../screens/profile/UserProfileScreen';
+import ProfilePlaceholderScreen from '../screens/profile/ProfilePlaceholderScreen';
 
 /**
  * ROUTE TYPES
@@ -26,6 +25,10 @@ import {
 export type ProfileStackParamList = {
     ProfileHome: undefined;
     EditProfile: undefined;
+    Followers: { userId?: string } | undefined;
+    Following: { userId?: string } | undefined;
+    UserProfile: { userId: string };
+
     Tasks: undefined;
     DailyCheckIn: undefined;
     Wallet: undefined;
@@ -70,7 +73,6 @@ type FeatureDefinition = {
 
 /**
  * FEATURE DEFINITIONS
- * (used by ProfileHome and by the generic feature screen)
  * ------------------------------------------------------------------ */
 const FEATURE_DEFINITIONS: FeatureDefinition[] = [
     {
@@ -153,7 +155,7 @@ const FEATURE_DEFINITIONS: FeatureDefinition[] = [
 ];
 
 const FEATURE_MAP: Record<FeatureRouteName, FeatureDefinition> =
-    FEATURE_DEFINITIONS.reduce<Record<FeatureRouteName, FeatureDefinition>>(
+    FEATURE_DEFINITIONS.reduce(
         (map, def) => {
             map[def.key] = def;
             return map;
@@ -162,7 +164,7 @@ const FEATURE_MAP: Record<FeatureRouteName, FeatureDefinition> =
     );
 
 /**
- * SHARED PRESENTATION COMPONENTS
+ * SHARED PRESENTATION COMPONENTS (for placeholder screens)
  * ------------------------------------------------------------------ */
 
 type ScreenContainerProps = {
@@ -183,7 +185,9 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
         >
             <Text style={styles.featureScreenTitle}>{title}</Text>
             {description ? (
-                <Text style={styles.featureScreenDescription}>{description}</Text>
+                <Text style={styles.featureScreenDescription}>
+                    {description}
+                </Text>
             ) : null}
             {children}
         </ScrollView>
@@ -195,7 +199,10 @@ type PrimaryButtonProps = {
     onPress: (event: GestureResponderEvent) => void;
 };
 
-const PrimaryButton: React.FC<PrimaryButtonProps> = ({ label, onPress }) => {
+const PrimaryButton: React.FC<PrimaryButtonProps> = ({
+                                                         label,
+                                                         onPress,
+                                                     }) => {
     return (
         <Pressable style={styles.primaryButton} onPress={onPress}>
             <Text style={styles.primaryButtonText}>{label}</Text>
@@ -204,173 +211,8 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({ label, onPress }) => {
 };
 
 /**
- * PROFILE HOME SCREEN
- * (main "Me" page)
+ * SIMPLE DETAIL PLACEHOLDER SCREENS
  * ------------------------------------------------------------------ */
-
-type ProfileHomeProps = ProfileStackScreenProps<'ProfileHome'>;
-
-const ProfileHomeScreen: React.FC<ProfileHomeProps> = ({ navigation }) => {
-    const { user } = useAuth();
-
-    const displayName =
-        user?.displayName?.trim() ||
-        fallbackUsernameFromEmail(user?.email) ||
-        'New user';
-
-    const userId =
-        user?.uid != null ? formatUserIdFromUid(user.uid) : '000-000-000';
-
-    return (
-        <ScrollView
-            style={styles.root}
-            contentContainerStyle={styles.rootContent}
-            showsVerticalScrollIndicator={false}
-        >
-            {/* Profile header */}
-            <View style={styles.profileHeaderRow}>
-                <View style={styles.avatarBubble}>
-                    <Text style={styles.avatarEmoji}>🔔</Text>
-                </View>
-
-                <View style={styles.profileHeaderTextColumn}>
-                    <Text style={styles.profileName}>{displayName}</Text>
-                    <Text style={styles.profileId}>ID {userId}</Text>
-
-                    <Pressable
-                        style={styles.completeProfileChip}
-                        onPress={() => navigation.navigate('EditProfile')}
-                    >
-                        <Text style={styles.completeProfileChipText}>
-                            Complete profile
-                        </Text>
-                    </Pressable>
-                </View>
-            </View>
-
-            {/* Stats row */}
-            <View style={styles.statsRow}>
-                {[
-                    { label: 'Following', value: '0' },
-                    { label: 'Fans', value: '0' },
-                    { label: 'Visitors', value: '0' },
-                    { label: 'Companions', value: '0' },
-                ].map((stat) => (
-                    <View key={stat.label} style={styles.statItem}>
-                        <Text style={styles.statValue}>{stat.value}</Text>
-                        <Text style={styles.statLabel}>{stat.label}</Text>
-                    </View>
-                ))}
-            </View>
-
-            {/* Tasks card */}
-            <Pressable
-                style={styles.tasksCard}
-                onPress={() => navigation.navigate('Tasks')}
-            >
-                <View style={styles.tasksHeaderRow}>
-                    <Text style={styles.tasksTitle}>
-                        Complete tasks and win rewards
-                    </Text>
-                    <Text style={styles.tasksMore}>More tasks &gt;</Text>
-                </View>
-
-                <View style={styles.tasksLevelRow}>
-                    <Text style={styles.tasksLevelLabel}>Lv. 1</Text>
-                    <View style={styles.tasksProgressTrack}>
-                        <View style={styles.tasksProgressFill} />
-                    </View>
-                </View>
-            </Pressable>
-
-            {/* Daily check-in card */}
-            <Pressable
-                style={styles.checkInCard}
-                onPress={() => navigation.navigate('DailyCheckIn')}
-            >
-                <View style={styles.checkInLeft}>
-                    <View style={styles.checkInIconBubble}>
-                        <Text style={styles.checkInIcon}>🎁</Text>
-                    </View>
-                    <View style={styles.checkInTextColumn}>
-                        <Text style={styles.checkInTitle}>
-                            Go to Check-in Center to claim daily rewards
-                        </Text>
-                    </View>
-                </View>
-
-                <View style={styles.checkInButton}>
-                    <Text style={styles.checkInButtonText}>View</Text>
-                </View>
-            </Pressable>
-
-            {/* Feature grid */}
-            <View style={styles.featureGridCard}>
-                <View style={styles.featureGrid}>
-                    {FEATURE_DEFINITIONS.map((feature) => (
-                        <Pressable
-                            key={feature.key}
-                            style={styles.featureItem}
-                            onPress={() => navigation.navigate(feature.key)}
-                        >
-                            <View
-                                style={[
-                                    styles.featureIconBubble,
-                                    { backgroundColor: feature.background },
-                                ]}
-                            >
-                                <Text style={styles.featureIconEmoji}>
-                                    {feature.iconEmoji}
-                                </Text>
-                            </View>
-                            <Text style={styles.featureLabel}>{feature.label}</Text>
-                        </Pressable>
-                    ))}
-                </View>
-            </View>
-
-            {/* Wallet / My Account */}
-            <Pressable
-                style={styles.walletCard}
-                onPress={() => navigation.navigate('Wallet')}
-            >
-                <View style={styles.walletHeaderRow}>
-                    <Text style={styles.walletTitle}>My Account</Text>
-                </View>
-
-                <View style={styles.walletBalanceRow}>
-                    <View style={styles.walletBalanceItem}>
-                        <Text style={styles.walletBalanceValue}>0.0</Text>
-                        <Text style={styles.walletBalanceLabel}>Diamond</Text>
-                    </View>
-
-                    <View style={styles.walletBalanceItem}>
-                        <Text style={styles.walletBalanceValue}>50.0</Text>
-                        <Text style={styles.walletBalanceLabel}>Golden bean</Text>
-                    </View>
-                </View>
-            </Pressable>
-        </ScrollView>
-    );
-};
-
-/**
- * SIMPLE DETAIL SCREENS
- * ------------------------------------------------------------------ */
-
-const EditProfileScreen: React.FC<
-    ProfileStackScreenProps<'EditProfile'>
-> = () => (
-    <ScreenContainer
-        title="Complete your profile"
-        description="Let users set their avatar, nickname, and personal details here."
-    >
-        <Text style={styles.placeholderBody}>
-            This is a placeholder edit-profile screen. Plug your real
-            profile-editing UI here.
-        </Text>
-    </ScreenContainer>
-);
 
 const TasksScreen: React.FC<ProfileStackScreenProps<'Tasks'>> = ({
                                                                      navigation,
@@ -434,7 +276,9 @@ const FeaturePlaceholderScreen: React.FC<FeatureScreenProps> = ({
         >
             <Text style={styles.placeholderBody}>
                 This is the placeholder screen for the{' '}
-                <Text style={styles.placeholderBodyStrong}>{feature.label}</Text>{' '}
+                <Text style={styles.placeholderBodyStrong}>
+                    {feature.label}
+                </Text>{' '}
                 feature. Flesh this out with the real functionality and UI when
                 you’re ready.
             </Text>
@@ -469,14 +313,31 @@ const ProfileStackNavigator: React.FC = () => {
         >
             <Stack.Screen
                 name="ProfileHome"
-                component={ProfileHomeScreen}
+                component={ProfileScreen}
                 options={{ headerShown: false }}
             />
 
             <Stack.Screen
                 name="EditProfile"
                 component={EditProfileScreen}
-                options={{ title: 'Complete profile' }}
+                options={{ title: 'Edit profile' }}
+            />
+
+            <Stack.Screen
+                name="Followers"
+                component={FollowListScreen}
+                options={{ title: 'Followers' }}
+            />
+            <Stack.Screen
+                name="Following"
+                component={FollowListScreen}
+                options={{ title: 'Following' }}
+            />
+
+            <Stack.Screen
+                name="UserProfile"
+                component={UserProfileScreen}
+                options={{ title: 'Profile' }}
             />
 
             <Stack.Screen
@@ -484,13 +345,11 @@ const ProfileStackNavigator: React.FC = () => {
                 component={TasksScreen}
                 options={{ title: 'Tasks & rewards' }}
             />
-
             <Stack.Screen
                 name="DailyCheckIn"
                 component={DailyCheckInScreen}
                 options={{ title: 'Daily check‑in' }}
             />
-
             <Stack.Screen
                 name="Wallet"
                 component={WalletScreen}
@@ -516,238 +375,6 @@ export default ProfileStackNavigator;
  * ------------------------------------------------------------------ */
 
 const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-        backgroundColor: '#050505',
-    },
-    rootContent: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 24,
-    },
-
-    profileHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    avatarBubble: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#333333',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 12,
-    },
-    avatarEmoji: {
-        fontSize: 32,
-    },
-    profileHeaderTextColumn: {
-        flex: 1,
-    },
-    profileName: {
-        color: '#ffffff',
-        fontSize: 20,
-        fontWeight: '700',
-        marginBottom: 4,
-    },
-    profileId: {
-        color: '#aaaaaa',
-        fontSize: 12,
-        marginBottom: 8,
-    },
-    completeProfileChip: {
-        alignSelf: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 999,
-        backgroundColor: '#ff8c43',
-    },
-    completeProfileChipText: {
-        color: '#1b1b1b',
-        fontSize: 11,
-        fontWeight: '600',
-    },
-
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-        paddingHorizontal: 8,
-    },
-    statItem: {
-        alignItems: 'center',
-        flex: 1,
-    },
-    statValue: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 2,
-    },
-    statLabel: {
-        color: '#888888',
-        fontSize: 11,
-    },
-
-    tasksCard: {
-        backgroundColor: '#181818',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        marginBottom: 12,
-    },
-    tasksHeaderRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    tasksTitle: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '600',
-        flex: 1,
-        marginRight: 8,
-    },
-    tasksMore: {
-        color: '#ffaa4c',
-        fontSize: 12,
-    },
-    tasksLevelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    tasksLevelLabel: {
-        color: '#aaaaaa',
-        fontSize: 12,
-        marginRight: 8,
-    },
-    tasksProgressTrack: {
-        flex: 1,
-        height: 5,
-        borderRadius: 999,
-        backgroundColor: '#262626',
-        overflow: 'hidden',
-    },
-    tasksProgressFill: {
-        flex: 0.3,
-        height: '100%',
-        borderRadius: 999,
-        backgroundColor: '#ffaa4c',
-    },
-
-    checkInCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#181818',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        marginBottom: 16,
-    },
-    checkInLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-        marginRight: 10,
-    },
-    checkInIconBubble: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#4b3fcb',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 10,
-    },
-    checkInIcon: {
-        fontSize: 20,
-    },
-    checkInTextColumn: {
-        flex: 1,
-    },
-    checkInTitle: {
-        color: '#ffffff',
-        fontSize: 13,
-        fontWeight: '500',
-    },
-    checkInButton: {
-        borderRadius: 999,
-        paddingHorizontal: 16,
-        paddingVertical: 6,
-        backgroundColor: '#ff8c43',
-    },
-    checkInButtonText: {
-        color: '#1b1b1b',
-        fontSize: 12,
-        fontWeight: '600',
-    },
-
-    featureGridCard: {
-        backgroundColor: '#181818',
-        borderRadius: 16,
-        paddingHorizontal: 10,
-        paddingVertical: 16,
-        marginBottom: 16,
-    },
-    featureGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    featureItem: {
-        width: '25%',
-        alignItems: 'center',
-        marginBottom: 18,
-    },
-    featureIconBubble: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 6,
-    },
-    featureIconEmoji: {
-        fontSize: 22,
-    },
-    featureLabel: {
-        color: '#e5e5e5',
-        fontSize: 11,
-    },
-
-    walletCard: {
-        backgroundColor: '#181818',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 14,
-    },
-    walletHeaderRow: {
-        marginBottom: 10,
-    },
-    walletTitle: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    walletBalanceRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    walletBalanceItem: {
-        flex: 1,
-    },
-    walletBalanceValue: {
-        color: '#ffffff',
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    walletBalanceLabel: {
-        color: '#888888',
-        fontSize: 12,
-    },
-
     featureScreenRoot: {
         flex: 1,
         backgroundColor: '#050505',
@@ -768,7 +395,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginBottom: 20,
     },
-
     placeholderBody: {
         color: '#dddddd',
         fontSize: 14,
@@ -778,7 +404,6 @@ const styles = StyleSheet.create({
     placeholderBodyStrong: {
         fontWeight: '700',
     },
-
     primaryButton: {
         marginTop: 8,
         borderRadius: 999,

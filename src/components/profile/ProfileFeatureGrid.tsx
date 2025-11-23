@@ -2,12 +2,12 @@
 
 import React from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
     FlatList,
-    TouchableOpacity,
     ListRenderItemInfo,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -16,17 +16,17 @@ import colors from '../../theme/colors';
 import spacing from '../../theme/spacing';
 
 export type ProfileFeatureId =
-    | 'ProfileBackpack'
-    | 'ProfileNobility'
-    | 'ProfileMall'
-    | 'ProfileGiftWall'
-    | 'ProfileFamily'
-    | 'ProfileUnion'
-    | 'ProfileBadgeWall'
-    | 'ProfileFuture'
-    | 'ProfileCPHouse'
-    | 'ProfileMentorship'
-    | 'ProfileHeart';
+    | 'Backpack'
+    | 'Nobility'
+    | 'Mall'
+    | 'GiftWall'
+    | 'Family'
+    | 'Union'
+    | 'BadgeWall'
+    | 'Future'
+    | 'CPHouse'
+    | 'Mentorship'
+    | 'Heart';
 
 export interface ProfileFeature {
     id: ProfileFeatureId;
@@ -39,17 +39,17 @@ interface ProfileFeatureGridProps {
 }
 
 const FEATURES: ProfileFeature[] = [
-    { id: 'ProfileBackpack', label: 'Backpack', icon: 'briefcase-outline' },
-    { id: 'ProfileNobility', label: 'Nobility', icon: 'ribbon-outline' },
-    { id: 'ProfileMall', label: 'Mall', icon: 'bag-handle-outline' },
-    { id: 'ProfileGiftWall', label: 'Gift Wall', icon: 'gift-outline' },
-    { id: 'ProfileFamily', label: 'Family', icon: 'people-outline' },
-    { id: 'ProfileUnion', label: 'Union', icon: 'layers-outline' },
-    { id: 'ProfileBadgeWall', label: 'Badge Wall', icon: 'medal-outline' },
-    { id: 'ProfileFuture', label: 'Future', icon: 'planet-outline' },
-    { id: 'ProfileCPHouse', label: 'CP House', icon: 'home-outline' },
-    { id: 'ProfileMentorship', label: 'Mentorship', icon: 'school-outline' },
-    { id: 'ProfileHeart', label: 'Heart', icon: 'heart-outline' },
+    { id: 'Backpack', label: 'Backpack', icon: 'briefcase-outline' },
+    { id: 'Nobility', label: 'Nobility', icon: 'ribbon-outline' },
+    { id: 'Mall', label: 'Mall', icon: 'bag-handle-outline' },
+    { id: 'GiftWall', label: 'Gift Wall', icon: 'gift-outline' },
+    { id: 'Family', label: 'Family', icon: 'people-outline' },
+    { id: 'Union', label: 'Union', icon: 'layers-outline' },
+    { id: 'BadgeWall', label: 'Badge Wall', icon: 'medal-outline' },
+    { id: 'Future', label: 'Future', icon: 'planet-outline' },
+    { id: 'CPHouse', label: 'CP House', icon: 'home-outline' },
+    { id: 'Mentorship', label: 'Mentorship', icon: 'school-outline' },
+    { id: 'Heart', label: 'Heart', icon: 'heart-outline' },
 ];
 
 const ProfileFeatureGrid: React.FC<ProfileFeatureGridProps> = ({

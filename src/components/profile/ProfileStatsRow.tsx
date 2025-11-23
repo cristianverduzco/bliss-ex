@@ -1,13 +1,18 @@
 // src/components/profile/ProfileStatsRow.tsx
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import colors from '../../theme/colors';
 import spacing from '../../theme/spacing';
 
 interface ProfileStatsRowProps {
     following?: number;
-    fans?: number;
+    fans?: number; // treated as "followers" in UI
     visitors?: number;
     companions?: number;
     onPressFollowing: () => void;
@@ -28,7 +33,7 @@ const ProfileStatsRow: React.FC<ProfileStatsRowProps> = ({
                                                          }) => {
     const stats = [
         { label: 'Following', value: following, onPress: onPressFollowing },
-        { label: 'Fans', value: fans, onPress: onPressFans },
+        { label: 'Followers', value: fans, onPress: onPressFans },
         { label: 'Visitors', value: visitors, onPress: onPressVisitors },
         { label: 'Companions', value: companions, onPress: onPressCompanions },
     ];
